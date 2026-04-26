@@ -31,6 +31,7 @@ import {
   Menu,
   MessageSquare,
   Package,
+  Plus,
   Puzzle,
   RotateCw,
   Settings,
@@ -249,6 +250,7 @@ function buildRoutes(
 export default function App() {
   const { t } = useI18n();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { manifests } = usePlugins();
   const { theme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -435,7 +437,7 @@ export default function App() {
                     ? ((t.app.nav as Record<string, string>)[labelKey] ?? label)
                     : label;
                   return (
-                    <li key={path}>
+                    <li key={path} className={cn(path === "/chat" && "flex items-center")}>
                       <NavLink
                         to={path}
                         end={path === "/sessions"}
@@ -444,6 +446,7 @@ export default function App() {
                           cn(
                             "group relative flex items-center gap-3",
                             "px-5 py-2.5",
+                            path === "/chat" && "flex-1 min-w-0",
                             "font-mondwest text-[0.8rem] tracking-[0.12em]",
                             "whitespace-nowrap transition-colors cursor-pointer",
                             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-midground",
@@ -476,6 +479,27 @@ export default function App() {
                           </>
                         )}
                       </NavLink>
+                      {embeddedChat && path === "/chat" && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate("/chat?new=1");
+                            closeMobile();
+                          }}
+                          title="New session"
+                          aria-label="Start a new session"
+                          className={cn(
+                            "flex items-center justify-center px-3 py-2.5",
+                            "text-midground/60 hover:text-midground",
+                            "opacity-0 group-hover:opacity-100",
+                            "transition-opacity duration-150 cursor-pointer",
+                            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-midground",
+                          )}
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </li>
                   );
                 })}

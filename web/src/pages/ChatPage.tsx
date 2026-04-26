@@ -24,7 +24,7 @@ import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import { Typography } from "@nous-research/ui";
 import { cn } from "@/lib/utils";
-import { Copy, PanelRight, Plus, X } from "lucide-react";
+import { Copy, PanelRight, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
@@ -212,16 +212,31 @@ export default function ChatPage() {
     termRef.current?.focus();
   };
 
-  const handleNewSession = () => {
-    const ws = wsRef.current;
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
-    ws.send("/new");
-    setTimeout(() => {
-      const s = wsRef.current;
-      if (s && s.readyState === WebSocket.OPEN) s.send("\r");
-    }, 100);
-    termRef.current?.focus();
-  };
+  // When navigated to /chat?new=1, send /new through the PTY to start a fresh session.
+  const newSessionTriggeredRef = useRef<string | null>(null);
+  useEffect(() => {
+    const newParam = searchParams.get("new");
+    if (!newParam || newParam === newSessionTriggeredRef.current) return;
+    newSessionTriggeredRef.current = newParam;
+
+    const sendNew = () => {
+      const ws = wsRef.current;
+      if (ws?.readyState === WebSocket.OPEN) {
+        ws.send("/new");
+        setTimeout(() => {
+          const s = wsRef.current;
+          if (s?.readyState === WebSocket.OPEN) s.send("\r");
+        }, 100);
+      }
+    };
+    // If WS isn't open yet (PTY still booting), retry after a short delay.
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      sendNew();
+    } else {
+      const timer = setTimeout(sendNew, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -728,30 +743,6 @@ export default function ChatPage() {
             <Copy className="h-3 w-3 shrink-0" />
             <span className="hidden min-[400px]:inline tracking-wide">
               {copyState === "copied" ? "copied" : "copy last response"}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleNewSession}
-            title="Start a new session"
-            aria-label="Start a new session"
-            className={cn(
-              "absolute z-10 flex items-center gap-1.5",
-              "rounded border border-current/30",
-              "bg-black/20 backdrop-blur-sm",
-              "opacity-60 hover:opacity-100 hover:border-current/60",
-              "transition-opacity duration-150",
-              "focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-current",
-              "cursor-pointer",
-              "bottom-2 left-2 px-2 py-1 text-[0.65rem] sm:bottom-3 sm:left-3 sm:px-2.5 sm:py-1.5 sm:text-xs",
-              "lg:bottom-4 lg:left-4",
-            )}
-            style={{ color: TERMINAL_THEME.foreground }}
-          >
-            <Plus className="h-3 w-3 shrink-0" />
-            <span className="hidden min-[400px]:inline tracking-wide">
-              new session
             </span>
           </button>
         </div>
