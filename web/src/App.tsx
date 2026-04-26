@@ -437,14 +437,19 @@ export default function App() {
                     ? ((t.app.nav as Record<string, string>)[labelKey] ?? label)
                     : label;
                   return (
-                    <li key={path} className={cn(path === "/chat" && "flex items-center")}>
+                    <li key={path} className={cn("group relative", path === "/chat" && "flex items-center")}>
+                      {/* Row background overlay — covers both NavLink and + button */}
+                      <span
+                        aria-hidden
+                        className="absolute inset-y-0.5 left-1.5 right-1.5 bg-midground opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-5"
+                      />
                       <NavLink
                         to={path}
                         end={path === "/sessions"}
                         onClick={closeMobile}
                         className={({ isActive }) =>
                           cn(
-                            "group relative flex items-center gap-3",
+                            "relative flex items-center gap-3",
                             "px-5 py-2.5",
                             path === "/chat" && "flex-1 min-w-0",
                             "font-mondwest text-[0.8rem] tracking-[0.12em]",
@@ -463,11 +468,6 @@ export default function App() {
                           <>
                             <Icon className="h-3.5 w-3.5 shrink-0" />
                             <span className="truncate">{navLabel}</span>
-
-                            <span
-                              aria-hidden
-                              className="absolute inset-y-0.5 left-1.5 right-1.5 bg-midground opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-5"
-                            />
 
                             {isActive && (
                               <span
@@ -490,7 +490,7 @@ export default function App() {
                           title="New session"
                           aria-label="Start a new session"
                           className={cn(
-                            "flex items-center justify-center px-3 py-2.5",
+                            "relative z-10 flex items-center justify-center px-3 py-2.5",
                             "text-midground/40 hover:text-midground",
                             "opacity-40 group-hover:opacity-100",
                             "transition-opacity duration-150 cursor-pointer",
