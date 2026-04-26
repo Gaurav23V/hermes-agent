@@ -491,8 +491,8 @@ export default function App() {
                           aria-label="Start a new session"
                           className={cn(
                             "flex items-center justify-center px-3 py-2.5",
-                            "text-midground/60 hover:text-midground",
-                            "opacity-0 group-hover:opacity-100",
+                            "text-midground/40 hover:text-midground",
+                            "opacity-40 group-hover:opacity-100",
                             "transition-opacity duration-150 cursor-pointer",
                             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-midground",
                           )}
