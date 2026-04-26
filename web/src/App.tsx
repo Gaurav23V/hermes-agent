@@ -71,6 +71,15 @@ function RootRedirect() {
   return <Navigate to="/sessions" replace />;
 }
 
+/**
+ * Stand-in for the /chat route inside <Routes>.
+ * ChatPage is rendered separately, always mounted (see App body),
+ * so this just claims the URL slot to prevent the catch-all redirect.
+ */
+function ChatSlot() {
+  return null;
+}
+
 const CHAT_NAV_ITEM: NavItem = {
   path: "/chat",
   labelKey: "chat",
@@ -252,7 +261,7 @@ export default function App() {
   const builtinRoutes = useMemo(
     () => ({
       ...BUILTIN_ROUTES_CORE,
-      ...(embeddedChat ? { "/chat": ChatPage } : {}),
+      ...(embeddedChat ? { "/chat": ChatSlot } : {}),
     }),
     [embeddedChat],
   );
@@ -510,6 +519,17 @@ export default function App() {
                   (isDocsRoute || isChatRoute) && "min-h-0 flex flex-1 flex-col",
                 )}
               >
+                {embeddedChat && (
+                  <div
+                    className={
+                      isChatRoute
+                        ? "min-h-0 flex flex-1 flex-col"
+                        : "hidden"
+                    }
+                  >
+                    <ChatPage />
+                  </div>
+                )}
                 <Routes>
                   {routes.map(({ key, path, element }) => (
                     <Route key={key} path={path} element={element} />
